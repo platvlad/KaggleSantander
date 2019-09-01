@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import lightgbm as lgb
-from sklearn.metrics import roc_auc_score
 
 
 def separate_labels(df):
@@ -27,7 +26,7 @@ x_test_scaled = sc.transform(x_test)
 d_train = lgb.Dataset(x_train_scaled, label=y_train)
 
 params = {}
-params['learning_rate'] = 0.0022
+params['learning_rate'] = 0.0006
 params['boosting_type'] = 'gbdt'
 params['objective'] = 'binary'
 params['metric'] = 'auc'
@@ -42,11 +41,13 @@ params['feature_fraction'] = 0.041
 params['bagging_freq'] = 5
 params['bagging_fraction'] = 0.331
 params['seed'] = 44000
-clf = lgb.train(params, d_train, 32000)
+clf = lgb.train(params, d_train, 128000)
 y_test_score = clf.predict(x_test_scaled)
 
-id_codes = test.loc[:, (test.columns == 'ID_code')]
-output_df = pd.DataFrame(y_test_score, columns=['target'])
-df_to_write = pd.concat([id_codes, output_df], axis=1, sort=False)
-df_to_write.to_csv('submission.csv', index=False)
+np.save('y_lgmb', y_test_score)
+
+# id_codes = test.loc[:, (test.columns == 'ID_code')]
+# output_df = pd.DataFrame(y_test_score, columns=['target'])
+# df_to_write = pd.concat([id_codes, output_df], axis=1, sort=False)
+# df_to_write.to_csv('submission.csv', index=False)
 
